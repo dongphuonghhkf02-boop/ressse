@@ -1,0 +1,30 @@
+{
+  "summary": "Frontend-only testing of ФАЗА 1 ROADMAP (Резерв ID PDF generation + extended profile fields). All 6 acceptance criteria PASSED: (1) Home card renders with DEFAULT_PROFILE (ІВАНОВ ІВАН Іванович, 11.11.1111, завершення мобілізації); (2) 4 tabs present and tappable; (3) Edit-mode via trident works (input-surname/name/patronymic/birthDate/deferralUntil + save-button); (4) Settings exposes all 6 sections including new 'Поліція' and 'ВЛК / Інвалідність'; all 8 new optional fields (removalBasis, policeReason, policeDate, vlkDecision, vlkDate, disabilityGroup, disabilityValidUntil, disabilityReason) default to '-'; (5) Persistence works — set vlkDecision='Придатний' → Зберегти → reopen settings → value persisted, and PDF contains it; (6) PDF (web window.open) HTML contains all 23 rows from §6 ROADMAP in EXACT order, QR <img class='qr-img'> present, photo (base64) absent; ПІБ/RNOKPP/VOS values from AsyncStorage profile correctly substituted; Reset button present. No red-screen errors. Deprecated API detected: ImagePicker.MediaTypeOptions.Images (SDK 54).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "react_native_issues": [
+      {"component": "expo-image-picker MediaTypeOptions", "issue": "ImagePicker.MediaTypeOptions.Images is deprecated in Expo SDK 54 / expo-image-picker 16+. Use array form: mediaTypes: ['images']. Reference: /app/frontend/app/index.tsx:297 and /app/frontend/app/settings.tsx:163"},
+      {"component": "props.pointerEvents", "issue": "Multiple 'WARN  props.pointerEvents is deprecated. Use style.pointerEvents' warnings in expo logs. Likely originating from react-native-reanimated/Modal/Pressable wrappers. Non-blocking, but should be reviewed."}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Replace ImagePicker.MediaTypeOptions.Images with mediaTypes: ['images'] in app/index.tsx and app/settings.tsx (Expo SDK 54 deprecation).",
+    "Investigate props.pointerEvents deprecation warnings (low priority — does not block functionality)."
+  ],
+  "critical_code_review_comments": [
+    "/app/frontend/app/index.tsx is 1245 lines — already noted in ROADMAP §7 P2-15 as tech debt; consider splitting into FrontSide.tsx/BackSide.tsx/TabBar.tsx.",
+    "Reset confirmation in settings.tsx uses Alert.alert which on web does not show a styled confirm; on web Alert is mapped to window.confirm and works, but consider a custom modal for consistency.",
+    "QR payload is plain JSON — already noted in ROADMAP §7 P1-7 as future improvement."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (not requested)", "frontend": "100%"},
+  "seed_data_creation": "None. App is offline-first; DEFAULT_PROFILE in /app/frontend/src/utils/profile.ts is used as initial data.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "All ФАЗА 1 acceptance criteria pass. The single notable issue is the deprecated ImagePicker.MediaTypeOptions.Images call (does not crash on web preview but will warn on native and break in future Expo versions). PDF preview on web is opened via window.open + document.write — tests intercept window.open to capture the HTML; on native expo-print + expo-sharing path was NOT exercised (browser preview only).",
+  "rca_of_issue": "N/A — no functional bugs found. Deprecated API is non-blocking and was inherited from earlier code."
+}
